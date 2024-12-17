@@ -150,7 +150,8 @@ struct net_stack* nn_from_file(char* file){
     return NULL;
 
   int size;
-  fread(&size,sizeof(int),1,f);
+  if(fread(&size,sizeof(int),1,f)!=1)
+    printf("warning possible file corruption\n");
 
   struct net_stack* top = NULL;
 

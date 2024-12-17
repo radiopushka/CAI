@@ -4,6 +4,7 @@
 #include <math.h>
 
 #define EULER 2.7182818284
+#define PI 3.1415926535898
 
 //basic functions
 //
@@ -104,7 +105,7 @@ void activate(struct nn* network){
   while(optr < oend){
     switch(type){
       case ACTIVATION_TAN:
-        *optr = atan(*optr);
+        *optr = 0.5+(atan(*optr))/PI;
         break;
       case ACTIVATION_SIN:
         if(*optr < 0)
@@ -248,8 +249,16 @@ void n_to_file_stream(struct nn* network,FILE* f){
 struct nn* n_from_file_stream(FILE* f){
   int size;
   int activation;
-  fread(&size,sizeof(int),1,f);
-  fread(&activation,sizeof(int),1,f);
+  int result=0;
+
+  result=fread(&size,sizeof(int),1,f);
+  if(result != 1)
+    printf("warning possible file corruption\n");
+
+  result=fread(&activation,sizeof(int),1,f);
+  if(result != 1)
+    printf("warning possible file corruption\n");
+
   struct nn* network = malloc(sizeof(struct nn));
 
   network -> output_size = size;
@@ -259,7 +268,13 @@ struct nn* n_from_file_stream(FILE* f){
   network -> outputs = malloc(sizeof(float)*size);
   network -> weights = malloc(sizeof(float)*(size*size));
 
-  fread(network -> outputs, sizeof(float), size,f);
-  fread(network -> weights, sizeof(float), size*size,f);
+  result=fread(network -> outputs, sizeof(float), size,f);
+  if(result != size)
+    printf("warning possible file corruption\n");
+
+  result=fread(network -> weights, sizeof(float), size*size,f);
+  if(result != size*size)
+    printf("warning possible file corruption\n");
+
   return network;
 }
