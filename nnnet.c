@@ -1,5 +1,6 @@
 #include "nnnet.h"
 #include <stdlib.h>
+#include <string.h>
 
 struct net_stack* setup_nn(int io_port_size,int activation,int depth){
 
@@ -28,6 +29,23 @@ struct net_stack* setup_nn(int io_port_size,int activation,int depth){
   return top;
 }
 
+
+void get_last_values(struct net_stack* nst,float* to){
+  struct net_stack* prev = nst;
+  nst = nst -> next;
+  int osize = nst->contained->output_size;
+  while(nst != NULL){
+    prev = nst;
+    nst = nst -> next;
+  }
+
+
+  memcpy(to, prev -> contained -> outputs, sizeof(float) * osize);
+
+
+
+}
+
 void nn_fwd(struct net_stack* nst,float* input, float* output){
 
   propagate(input,nst -> contained);
@@ -41,14 +59,9 @@ void nn_fwd(struct net_stack* nst,float* input, float* output){
 
   }
   int osize = prev -> contained -> output_size;
-  float* output_array = prev -> contained -> outputs;
-  float* output_end = prev -> contained -> outputs + osize;
 
-  while(output_array < output_end){
-    *output = *output_array;
-    output++;
-    output_array++;
-  }
+  memcpy(output , prev->contained->outputs, sizeof(float) * osize);
+
   
 }
 
